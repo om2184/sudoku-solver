@@ -19,20 +19,27 @@ def solve(board):
         row, col = find
 
     for i in range (1,10):
-        if valid(board, i, (row, col)):
+        if is_valid(board, i, (row, col)):
+            board[row][col] = i
 
+            if solve(board):
+                return True
+            
+            board[row][col] = 0
+        
+    return False
     
 
 def is_valid(board, number, position):
     
     # Check row
     for i in range (len(board[0])):
-        if board[position[0]][i] == num and pos[1] != i:
+        if board[position[0]][i] == number and position[1] != i:
             return False
         
     # Check coloumn
     for i in range (len(board)):
-        if board[i][position[1]] == num and pos[0] != i:
+        if board[i][position[1]] == number and position[0] != i:
             return False
 
     # Check box
@@ -41,7 +48,7 @@ def is_valid(board, number, position):
 
     for i in range (box_y * 3, box_y * 3 + 3):
         for j in range (box_x * 3, box_x * 3 + 3):
-            if board[i][j] == num and (i,j) != position:
+            if board[i][j] == number and (i,j) != position:
                 return False
     
     return True
@@ -69,3 +76,9 @@ def find_empty(board):
                 return (i, j)  # row, col
     
     return None
+
+
+print_board(board)
+solve(board)
+print("__________________________________")
+print_board(board)
