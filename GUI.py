@@ -1,6 +1,7 @@
 import pygame
 import time
 from solver import solve, is_valid, find_empty
+from sudoku_generator import generate_sudoku
 
 
 class Grid:
@@ -207,17 +208,7 @@ def main():
     pygame.init()
     win = pygame.display.set_mode((550,600))
     pygame.display.set_caption("Sudoku")
-    grid = [
-        [0, 5, 8, 0, 0, 9, 0, 1, 0],
-        [0, 0, 3, 0, 6, 2, 0, 0, 0],
-        [0, 9, 1, 0, 3, 8, 0, 0, 0],
-        [0, 8, 0, 0, 0, 3, 0, 0, 7],
-        [3, 0, 4, 0, 0, 0, 0, 0, 5],
-        [0, 7, 9, 0, 5, 4, 0, 0, 0],
-        [9, 6, 2, 3, 0, 5, 7, 8, 0],
-        [0, 1, 0, 0, 0, 6, 0, 3, 9],
-        [4, 3, 0, 8, 9, 0, 5, 2, 0]
-    ]
+    grid = generate_sudoku()
     board = Grid(9, 9, 550, 550, win, grid)
     key = None
     run = True
