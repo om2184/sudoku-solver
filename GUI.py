@@ -1,26 +1,17 @@
 import pygame
 import requests
-from solver import solve, is_valid
+from solver import solve, is_valid, find_empty
 
 
 
 
 class Grid:
-    board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
-    ]
+  
 
-    def __init__(self, rows, cols, width, height, win):
+    def __init__(self, rows, cols, width, height, win, board):
         self.rows = rows
         self.cols = cols
+        self.board = board
         self.cubes = [[Cube(self.board[i][j], i, j, width, height) for j in range(cols)] for i in range(rows)]
         self.width = width
         self.height = height
@@ -100,6 +91,33 @@ class Grid:
             return None
 
 
+    def solve_gui(self):
+        find = find_empty(self.model)
+        if not find:
+            return True
+        else:
+            row, col = find
+
+        for i in range(1,10):
+            if is_valid(self.model, i, (row, col)):
+                self.model[row][col] = i
+                self.cubes[row][col].set(i)
+                self.cubes[row][col].draw_change(self.win, True)
+                self.update_model()
+                pygame.display.update()
+
+                if self.solve_gui():
+                    return True
+
+                self.model[row][col] = 0
+                self.cubes[row][col].set(0)
+                self.update_model()
+                self.cubes[row][col].draw_change(self.win, False)
+                pygame.display.update()
+
+        return False
+
+
 class Cube:
     rows = 9
     cols = 9
@@ -128,7 +146,25 @@ class Cube:
             win.blit(text, (x + (gap/2 - text.get_width()/2), y + (gap/2 - text.get_height()/2)))
 
         if self.selected:
-            pygame.draw.rect(win, (255,0,0), (x,y, gap ,gap), 3)
+            pygame.draw.rect(win, (0,0,255), (x,y, gap ,gap), 3)
+
+    
+    def draw_change(self, win, is_correct):
+        fnt = pygame.font.SysFont("Arial", 35)
+
+        gap = self.width / 9
+        x = self.col * gap
+        y = self.row * gap
+
+        pygame.draw.rect(win, (255, 255, 255), (x, y, gap, gap), 0)
+
+        text = fnt.render(str(self.value), 1, (0, 0, 0))
+        win.blit(text, (x + (gap / 2 - text.get_width() / 2), y + (gap / 2 - text.get_height() / 2)))
+        if is_correct:
+            pygame.draw.rect(win, (0, 255, 0), (x, y, gap, gap), 3)
+        else:
+            pygame.draw.rect(win, (255, 0, 0), (x, y, gap, gap), 3)
+
 
 
 
@@ -145,7 +181,18 @@ def main():
     pygame.init()
     win = pygame.display.set_mode((550,600))
     pygame.display.set_caption("Sudoku")
-    board = Grid(9, 9, 550, 550, win)
+    grid = [
+        [0, 5, 8, 0, 0, 9, 0, 1, 0],
+        [0, 0, 3, 0, 6, 2, 0, 0, 0],
+        [0, 9, 1, 0, 3, 8, 0, 0, 0],
+        [0, 8, 0, 0, 0, 3, 0, 0, 7],
+        [3, 0, 4, 0, 0, 0, 0, 0, 5],
+        [0, 7, 9, 0, 5, 4, 0, 0, 0],
+        [9, 6, 2, 3, 0, 5, 7, 8, 0],
+        [0, 1, 0, 0, 0, 6, 0, 3, 9],
+        [4, 3, 0, 8, 9, 0, 5, 2, 0]
+    ]
+    board = Grid(9, 9, 550, 550, win, grid)
     key = None
     run = True
 
@@ -154,7 +201,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.KEYDOWN:
-                if event.type == pygame.K_1:
+                if event.key == pygame.K_1:
                     key = 1
                 if event.key == pygame.K_2:
                     key = 2
@@ -176,6 +223,9 @@ def main():
                     board.clear()
                     key = None
 
+                if event.key == pygame.K_SPACE:
+                    board.solve_gui()
+
                 if event.key == pygame.K_RETURN:
                     i, j = board.selected
                     if board.cubes[i][j].temp != 0:
@@ -187,6 +237,7 @@ def main():
 
                         if board.is_finished():
                             print("Game over")
+
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
