@@ -1,5 +1,6 @@
 import pygame
-from solver import solve, isValid, findEmpty
+import time
+from solver import solve, is_valid, find_empty
 
 
 class Grid:
@@ -55,7 +56,7 @@ class Grid:
             self.cubes[row][col].set(val)
             self.update_model()
 
-            if isValid(self.model, val, (row,col)) and solve(self.model):
+            if is_valid(self.model, val, (row,col)) and solve(self.model):
                 return True
             else:
                 self.cubes[row][col].set(0)
@@ -86,14 +87,14 @@ class Grid:
 
 
     def solve_gui(self):
-        find = findEmpty(self.model)
+        find = find_empty(self.model)
         if not find:
             return True
         else:
             row, col = find
 
         for i in range(1,10):
-            if isValid(self.model, i, (row, col)):
+            if is_valid(self.model, i, (row, col)):
                 self.model[row][col] = i
                 self.cubes[row][col].set(i)
                 self.cubes[row][col].draw_change(self.win, True)
@@ -110,7 +111,6 @@ class Grid:
                 pygame.display.update()
 
         return False
-
 
 class Cube:
     rows = 9
@@ -169,7 +169,18 @@ class Cube:
     def set_temp(self, val):
         self.temp = val
 
+def format_time(secs):
+    sec = secs % 60
+    minute = (secs // 60) % 60
+    hour = secs // 3600
 
+    # Properly format the string with leading zeros if needed
+    if hour > 0:
+        formatted_time = f"{hour}:{minute:02}:{sec:02}"
+    else:
+        formatted_time = f"{minute:02}:{sec:02}"
+
+    return formatted_time
 
 def main():
     pygame.init()
