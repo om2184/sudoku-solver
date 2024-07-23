@@ -182,15 +182,19 @@ def format_time(secs):
 
     return formatted_time
 
-def update_window(win, board, time):
+def update_window(win, board, time, strikes):
     win.fill((255,255,255))
+    font = pygame.font.SysFont("Arial", 25)
 
-    font = pygame.font.SysFont("Arial", 30)
-
+    # Display time
     formatted_time = format_time(time)
     text = font.render("Time: " + formatted_time, 1, (0,0,0))
     win.blit(text, (10, 560))
     
+    # Display Strikes
+    strike_count = font.render("X " * strikes, 1, (255, 0, 0))
+    win.blit(strike_count, (475, 560))
+
     board.draw()
 
 def main():
@@ -212,6 +216,7 @@ def main():
     key = None
     run = True
     start = time.time()
+    strikes = 0
 
     while run:
 
@@ -253,6 +258,7 @@ def main():
                             print("Success")
                         else:
                             print("Wrong")
+                            strikes += 1
                         key = None
 
                         if board.is_finished():
@@ -266,11 +272,17 @@ def main():
                     board.select(clicked[0], clicked[1])
                     key = None
             
+        
         if board.selected and key != None:
             board.sketch(key)
             
-        update_window(win, board, play_time)
+        update_window(win, board, play_time, strikes)
         pygame.display.update()
+
+        if strikes == 3:
+            print("Game over")
+            board.solve_gui()
+
 
 main()
 pygame.quit()
