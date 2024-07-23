@@ -127,6 +127,10 @@ class Cube:
             text = font.render(str(self.value), 1, (0, 0, 0))
             win.blit(text, (x + (gap/2 - text.get_width()/2), y + (gap/2 - text.get_height()/2)))
 
+        if self.selected:
+            pygame.draw.rect(win, (255,0,0), (x,y, gap ,gap), 3)
+
+
 
     
     def set(self, val):
@@ -193,6 +197,10 @@ def main():
             
             if board.selected and key != None:
                 board.sketch(key)
+            
+            win.fill((255,255,255))
+            board.draw()
+            pygame.display.update()
 
 main()
 pygame.quit()
