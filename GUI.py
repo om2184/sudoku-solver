@@ -184,6 +184,7 @@ def format_time(secs):
 
 def update_window(win, board, time, strikes):
     win.fill((255,255,255))
+    left = 3 - strikes
     font = pygame.font.SysFont("Arial", 25)
 
     # Display time
@@ -192,7 +193,12 @@ def update_window(win, board, time, strikes):
     win.blit(text, (10, 560))
     
     # Display Strikes
+    if left == 1:
+        strike_msg = font.render(str(left) + " strike left:", 1, (0, 0, 0))
+    else:
+        strike_msg = font.render(str(left) + " strikes left:", 1, (0, 0, 0))
     strike_count = font.render("X " * strikes, 1, (255, 0, 0))
+    win.blit(strike_msg, (330, 560))
     win.blit(strike_count, (475, 560))
 
     board.draw()
