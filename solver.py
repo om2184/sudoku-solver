@@ -12,14 +12,14 @@ board = [
 
 
 def solve(board):
-    find = find_empty(board)
+    find = findEmpty(board)
     if not find:
         return True
     else:
         row, col = find
 
     for i in range (1,10):
-        if is_valid(board, i, (row, col)):
+        if isValid(board, i, (row, col)):
             board[row][col] = i
 
             if solve(board):
@@ -30,7 +30,7 @@ def solve(board):
     return False
     
 
-def is_valid(board, number, position):
+def isValid(board, number, position):
     
     # Check row
     for i in range (len(board[0])):
@@ -53,32 +53,11 @@ def is_valid(board, number, position):
     
     return True
  
-def print_board(board):
-    
-    for i in range(len(board)): 
-        if i % 3 == 0 and i != 0:
-            print("- - - - - - - - - - - - - ")
 
-        for j in range(len(board[0])):
-            if j % 3 == 0 and j != 0:
-                print(" | ", end="")
-            
-            if j == 8:
-                print(board[i][j])
-            else:
-                print(str(board[i][j]) + " ", end="")
-            
-
-def find_empty(board):
+def findEmpty(board):
     for i in range(len(board)):
         for j in range(len(board[0])):
             if board[i][j] == 0:
                 return (i, j)  # row, col
     
     return None
-
-
-print_board(board)
-solve(board)
-print("__________________________________")
-print_board(board)

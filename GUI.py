@@ -1,13 +1,9 @@
 import pygame
-import requests
-from solver import solve, is_valid, find_empty
-
-
+from solver import solve, isValid, findEmpty
 
 
 class Grid:
   
-
     def __init__(self, rows, cols, width, height, win, board):
         self.rows = rows
         self.cols = cols
@@ -19,7 +15,6 @@ class Grid:
         self.update_model()
         self.selected = None
         self.win = win
-
 
     def update_model(self):
         self.model = [[self.cubes[i][j].value for j in range(self.cols)] for i in range(self.rows)]
@@ -50,7 +45,6 @@ class Grid:
         self.cubes[row][col].selected = True
         self.selected = (row, col)
 
-    
     def sketch(self, value):
         row, col = self.selected
         self.cubes[row][col].set_temp(value)
@@ -61,7 +55,7 @@ class Grid:
             self.cubes[row][col].set(val)
             self.update_model()
 
-            if is_valid(self.model, val, (row,col)) and solve(self.model):
+            if isValid(self.model, val, (row,col)) and solve(self.model):
                 return True
             else:
                 self.cubes[row][col].set(0)
@@ -92,14 +86,14 @@ class Grid:
 
 
     def solve_gui(self):
-        find = find_empty(self.model)
+        find = findEmpty(self.model)
         if not find:
             return True
         else:
             row, col = find
 
         for i in range(1,10):
-            if is_valid(self.model, i, (row, col)):
+            if isValid(self.model, i, (row, col)):
                 self.model[row][col] = i
                 self.cubes[row][col].set(i)
                 self.cubes[row][col].draw_change(self.win, True)
@@ -163,7 +157,7 @@ class Cube:
         if is_correct:
             pygame.draw.rect(win, (0, 255, 0), (x, y, gap, gap), 3)
         else:
-            pygame.draw.rect(win, (255, 0, 0), (x, y, gap, gap), 3)
+            pygame.draw.rect(win, (0, 0, 255), (x, y, gap, gap), 3)
 
 
 
