@@ -182,6 +182,17 @@ def format_time(secs):
 
     return formatted_time
 
+def update_window(win, board, time):
+    win.fill((255,255,255))
+
+    font = pygame.font.SysFont("Arial", 30)
+
+    formatted_time = format_time(time)
+    text = font.render("Time: " + formatted_time, 1, (0,0,0))
+    win.blit(text, (10, 560))
+    
+    board.draw()
+
 def main():
     pygame.init()
     win = pygame.display.set_mode((550,600))
@@ -200,8 +211,12 @@ def main():
     board = Grid(9, 9, 550, 550, win, grid)
     key = None
     run = True
+    start = time.time()
 
     while run:
+
+        play_time = round(time.time() - start)
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -251,12 +266,11 @@ def main():
                     board.select(clicked[0], clicked[1])
                     key = None
             
-            if board.selected and key != None:
-                board.sketch(key)
+        if board.selected and key != None:
+            board.sketch(key)
             
-            win.fill((255,255,255))
-            board.draw()
-            pygame.display.update()
+        update_window(win, board, play_time)
+        pygame.display.update()
 
 main()
 pygame.quit()
