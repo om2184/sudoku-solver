@@ -6,28 +6,32 @@ from solver import solve, is_valid
 
 
 class Grid:
-
     board = [
-    [7,8,0,4,0,0,1,2,0],
-    [6,0,0,0,7,5,0,0,9],
-    [0,0,0,6,0,1,0,7,8],
-    [0,0,7,0,4,0,2,6,0],
-    [0,0,1,0,5,0,9,3,0],
-    [9,0,4,0,6,0,0,0,5],
-    [0,7,0,3,0,0,0,1,2],
-    [1,2,0,0,0,7,4,0,0],
-    [0,4,9,2,0,6,0,0,7]
-]
-    
-    def _init_(self, rows, cols, width, height, win, board):
+        [7, 8, 0, 4, 0, 0, 1, 2, 0],
+        [6, 0, 0, 0, 7, 5, 0, 0, 9],
+        [0, 0, 0, 6, 0, 1, 0, 7, 8],
+        [0, 0, 7, 0, 4, 0, 2, 6, 0],
+        [0, 0, 1, 0, 5, 0, 9, 3, 0],
+        [9, 0, 4, 0, 6, 0, 0, 0, 5],
+        [0, 7, 0, 3, 0, 0, 0, 1, 2],
+        [1, 2, 0, 0, 0, 7, 4, 0, 0],
+        [0, 4, 9, 2, 0, 6, 0, 0, 7]
+    ]
+
+    def __init__(self, rows, cols, width, height, win):
         self.rows = rows
         self.cols = cols
         self.cubes = [[Cube(self.board[i][j], i, j, width, height) for j in range(cols)] for i in range(rows)]
         self.width = width
         self.height = height
         self.model = None
-        self.win = win
+        self.update_model()
         self.selected = None
+        self.win = win
+
+
+    def update_model(self):
+        self.model = [[self.cubes[i][j].value for j in range(self.cols)] for i in range(self.rows)]
 
     def draw(self):
         # Draw Grid Lines
@@ -55,18 +59,60 @@ class Grid:
         self.cubes[row][col].selected = True
         self.selected = (row, col)
 
+    
+    def sketch(self, value):
+        row, col = self.selected
+        self.cubes[row][col].set_temp(value)
+
+    def place(self, val):
+        row, col = self.selected
+        if self.cubes[row][col].value == 0:
+            self.cubes[row][col].set(val)
+            self.update_model()
+
+            if is_valid(self.model, val, (row,col)) and solve(self.model):
+                return True
+            else:
+                self.cubes[row][col].set(0)
+                self.cubes[row][col].set_temp(0)
+                self.update_model()
+                return False
+
+    def clear(self):
+        row, col = self.selected
+        if self.cubes[row][col].value == 0:
+            self.cubes[row][col].set_temp(0)
+
+    def is_finished(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if self.cubes[i][j].value == 0:
+                    return False
+        return True
+    
+    def click(self, pos):
+        if pos[0] < self.width and pos[1] < self.height:
+            gap = self.width / 9
+            x = pos[0] // gap
+            y = pos[1] // gap
+            return (int(y),int(x))
+        else:
+            return None
+
 
 class Cube:
     rows = 9
     cols = 9
 
-    def _init_(self, value, row, col, width, height):
+
+    def __init__(self, value, row, col, width, height):
         self.value = value
         self.temp = 0
         self.row = row
         self.col = col
         self.width = width
         self.height = height
+        self.selected = False
 
     def draw(self, win, gap):
         x = self.col * gap
@@ -93,16 +139,60 @@ class Cube:
 
 def main():
     pygame.init()
-    win = pygame.display.set_mode((550, 600))
+    win = pygame.display.set_mode((550,600))
     pygame.display.set_caption("Sudoku")
-    board = Grid(9, 9, 540, 540, win)
-    myfont = pygame.font.SysFont("Comic Sans MS", 35)
+    board = Grid(9, 9, 550, 550, win)
+    key = None
+    run = True
 
-
-    while True:
+    while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                return
-    
+                run = False
+            if event.type == pygame.KEYDOWN:
+                if event.type == pygame.K_1:
+                    key = 1
+                if event.key == pygame.K_2:
+                    key = 2
+                if event.key == pygame.K_3:
+                    key = 3
+                if event.key == pygame.K_4:
+                    key = 4
+                if event.key == pygame.K_5:
+                    key = 5
+                if event.key == pygame.K_6:
+                    key = 6
+                if event.key == pygame.K_7:
+                    key = 7
+                if event.key == pygame.K_8:
+                    key = 8
+                if event.key == pygame.K_9:
+                    key = 9
+                if event.key == pygame.K_BACKSPACE:
+                    board.clear()
+                    key = None
+
+                if event.key == pygame.K_RETURN:
+                    i, j = board.selected
+                    if board.cubes[i][j].temp != 0:
+                        if board.place(board.cubes[i][j].temp):
+                            print("Success")
+                        else:
+                            print("Wrong")
+                        key = None
+
+                        if board.is_finished():
+                            print("Game over")
+                
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                clicked = board.click(pos)
+                if clicked:
+                    board.select(clicked[0], clicked[1])
+                    key = None
+            
+            if board.selected and key != None:
+                board.sketch(key)
+
 main()
+pygame.quit()
